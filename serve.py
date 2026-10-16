@@ -5,8 +5,10 @@ from pathlib import Path
 import mimetypes
 import os
 import re
+import sys
 
 ROOT = Path(__file__).resolve().parent / "site"
+PAK_PATH = ROOT / "assets" / "pes6.pak"
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("PES6_PORT", "8765"))
 mimetypes.add_type("application/wasm", ".wasm")
@@ -108,6 +110,23 @@ class RangeHandler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    if not PAK_PATH.is_file():
+        print(
+            "Cannot start: local game data is missing. Expected: "
+            f"{PAK_PATH}\nRun assemble_pak.py if repository chunks are available, or "
+            "run bootstrap.py --pak /path/to/your/local/pes6.pak.",
+            file=sys.stderr,
+            flush=True,
+        )
+        raise SystemExit(2)
+    with PAK_PATH.open("rb") as pak_file:
+        if pak_file.read(8) != b"PES6PAK2":
+            print(
+                f"Cannot start: {PAK_PATH} is not a valid PES6PAK2 file.",
+                file=sys.stderr,
+                flush=True,
+            )
+            raise SystemExit(2)
     os.chdir(ROOT)
     server = ThreadingHTTPServer((HOST, PORT), RangeHandler)
     print(f"PES6 local server: http://{HOST}:{PORT}/", flush=True)

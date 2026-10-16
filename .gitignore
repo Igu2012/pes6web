@@ -1,0 +1,6 @@
+/site/assets/pes6.pak
+/assets/pes6.pak
+*.assembling
+*.download
+__pycache__/
+*.py[cod]
