@@ -1,0 +1,25 @@
+{
+  "format": "pes6web-pak-chunks-v1",
+  "target": "site/assets/pes6.pak",
+  "size": 352054197,
+  "sha256": "25b34e3253a7f5d74a72b7d0409ad1447f916778969d9587f9637fb4bad9d549",
+  "chunk_bytes": 94371840,
+  "parts": [
+    {
+      "file": "part-000.bin",
+      "bytes": 94371840
+    },
+    {
+      "file": "part-001.bin",
+      "bytes": 94371840
+    },
+    {
+      "file": "part-002.bin",
+      "bytes": 94371840
+    },
+    {
+      "file": "part-003.bin",
+      "bytes": 68938677
+    }
+  ]
+}
