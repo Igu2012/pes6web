@@ -14,7 +14,7 @@ window.PES6.Config = {
   data: 'PES6Recomp.data.gz',
   // Datos del juego, leídos por partes con peticiones Range.
   // '' = /PSP_GAME/USRDIR/pes6.pak en este mismo sitio; 'off' = .afs sueltos.
-  pak: '/assets/pes6.pak',
+  pak: 'assets/pes6.pak',
   // Generado con pak_commentary_manifest.py para el mismo PAK. Si no coincide,
   // se busca <URL del PAK>.commentary.json; sin lista se precarga todo el PAK.
   commentaryManifest: 'assets/pak-commentary.json',

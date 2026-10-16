@@ -18,20 +18,16 @@
   card.className = 'loading-card';
   var title = document.createElement('h1');
   title.id = 'loadingStage';
-  title.textContent = loopback ? 'Loading game' : 'Downloading game';
+  title.textContent = loopback ? 'Loading' : 'Downloading';
   var progress = document.createElement('progress');
   progress.id = 'loadingBar';
   progress.removeAttribute('value');
   var amount = document.createElement('p');
   amount.id = 'loadingAmount';
   amount.textContent = '0.0 MB / —';
-  var detail = document.createElement('p');
-  detail.id = 'loadingDetail';
-  detail.textContent = 'Preparing the browser game…';
   card.appendChild(title);
   card.appendChild(progress);
   card.appendChild(amount);
-  card.appendChild(detail);
   hud.appendChild(card);
   document.body.appendChild(hud);
 
@@ -52,23 +48,11 @@
     }
   }
 
-  function englishNote(note) {
-    var text = String(note || '').trim();
-    if (!text) return 'Please wait while the game prepares…';
-    if (/^(Reading requested ranges|Fetching requested|Please wait|Preparing|Compiling|Loading|Downloading|Starting|The game)/i.test(text)) return text;
-    if (/motor.*carg|carg.*motor/i.test(text)) return 'Game engine loaded. Preparing the game…';
-    if (/descarg/i.test(text)) return 'Downloading required game files…';
-    if (/compil/i.test(text)) return 'Compiling the game engine…';
-    if (/inici/i.test(text)) return 'Starting the game…';
-    if (/carg|prepar/i.test(text)) return 'Preparing the game…';
-    return 'Please wait while the game prepares…';
-  }
-
-  function render(stage, loaded, total, note) {
+  function render(stage, loaded, total) {
     if (failed || gameStarted) return;
     hud.hidden = false;
-    hud.classList.remove('has-error', 'is-complete');
-    title.textContent = stage;
+    hud.classList.remove('is-complete');
+    title.textContent = /^downloading\b/i.test(String(stage || '')) ? 'Downloading' : 'Loading';
     var current = Math.max(0, Number(loaded) || 0);
     var max = Math.max(0, Number(total) || 0);
     if (max > 0) {
@@ -80,7 +64,6 @@
       progress.removeAttribute('value');
       amount.textContent = formatMB(current) + ' / —';
     }
-    detail.textContent = englishNote(note);
   }
 
   function setPakTotal(total) {
@@ -92,8 +75,7 @@
     if (gameStarted || failed) return;
     if (Number(total) > 0) setPakTotal(total);
     var target = (window.PES6 && window.PES6.Core && window.PES6.Core.sources.pak) || '/assets/pes6.pak';
-    render(actionFor(target) + ' game data', loaded, pakTotal,
-      loopback ? 'Reading requested ranges from the local PAK…' : 'Fetching requested game-data ranges…');
+    render(actionFor(target), loaded, pakTotal);
   }
 
   function recordPakMetadata(bytes, total) {
@@ -122,7 +104,6 @@
       guidance = 'PES 6 could not start. Check that the local game data exists and that your browser supports WebGL 2.\n'
         + 'More help: https://github.com/Igu2012/pes6web';
     }
-    detail.textContent = guidance;
     progress.hidden = true;
     hud.hidden = true;
     try { window.alert(guidance); } catch (e) {}
@@ -139,8 +120,7 @@
 
     if (wasmProgress && !wasmProgress.hidden) {
       var wasmURL = sources.wasm || sources.engineScript || '/PES6Recomp.wasm.gz';
-      render(actionFor(wasmURL) + ' game engine', wasmProgress.value, wasmProgress.max,
-        wasmLabel ? wasmLabel.textContent.trim() : 'Preparing the game engine…');
+      render(actionFor(wasmURL), wasmProgress.value, wasmProgress.max);
       return;
     }
 
@@ -153,20 +133,19 @@
       var total = values[2] ? parseFloat(values[2].replace(',', '.')) * MB : 0;
       var dataPhase = /data|datos|juego/i.test(text);
       var source = dataPhase ? (sources.data || '/') : (sources.wasm || '/');
-      render(actionFor(source) + (dataPhase ? ' game files' : ' game engine'), loaded, total, text);
+      render(actionFor(source), loaded, total);
       return;
     }
 
     if (dependencyProgress && !dependencyProgress.hidden) {
-      render('Loading game runtime', 0, 0, text || 'Preparing emulator components…');
+      render('Loading', 0, 0);
       return;
     }
 
     if (text) {
       var downloading = /download|descarg/i.test(text);
-      var compiling = /compil|prepar|carg|load|inici/i.test(text);
       var action = downloading && !loopback ? 'Downloading' : 'Loading';
-      render(action + (compiling ? ' game engine' : ' game files'), 0, 0, text);
+      render(action, 0, 0);
     }
   }
 
@@ -180,8 +159,6 @@
   window.addEventListener('pes6:game-started', function () {
     if (failed) return;
     gameStarted = true;
-    title.textContent = 'Starting game…';
-    detail.textContent = 'The game is starting.';
     hud.classList.add('is-complete');
     window.setTimeout(function () { hud.hidden = true; }, 450);
   });

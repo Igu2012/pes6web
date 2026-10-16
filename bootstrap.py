@@ -102,15 +102,23 @@ def customize_site() -> None:
         '<script src="js/loading-progress.js"></script>\n  <script src="js/runtime/loader.js"></script>',
         "startup progress screen",
     )
+    text = replace_once(
+        text,
+        '<script src="js/data.js"></script>',
+        '<script src="js/pak-chunks.js"></script>\n  <script src="js/data.js"></script>',
+        "GitHub Pages chunk reader",
+    )
     index.write_text(text, encoding="utf-8")
 
     config = SITE / "js/config.js"
     text = config.read_text(encoding="utf-8")
-    if "pak: 'assets/pes6.pak'," in text:
-        text = replace_once(text, "pak: 'assets/pes6.pak',", "pak: '/assets/pes6.pak',", "absolute local data path")
+    if "pak: '/assets/pes6.pak'," in text:
+        text = replace_once(text, "pak: '/assets/pes6.pak',", "pak: 'assets/pes6.pak',", "relative local data path")
+    elif "pak: 'assets/pes6.pak'," in text:
+        pass
     else:
         text = replace_once(text, "pak: 'https://gitlab.com/api/v4/projects/87089186/packages/generic/game/1.0/iamarianotraining.html',",
-                            "pak: '/assets/pes6.pak',", "local game data")
+                            "pak: 'assets/pes6.pak',", "relative local game data")
     text = replace_once(text, "adsClient: 'ca-pub-7626037243619661'", "adsClient: ''", "disable publisher ads")
     config.write_text(text, encoding="utf-8")
 
@@ -242,6 +250,9 @@ def customize_site() -> None:
     )
     (SITE / "js/loading-progress.js").write_text(
         (ROOT / "loading-progress.js").read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    (SITE / "js/pak-chunks.js").write_text(
+        (ROOT / "pak-chunks.js").read_text(encoding="utf-8"), encoding="utf-8"
     )
 
 
