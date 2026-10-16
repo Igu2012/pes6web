@@ -25,10 +25,11 @@
   background: #000;
   font: 15px/1.45 "Open Sans", "Noto Sans", Arial, sans-serif;
   opacity: 1;
+  pointer-events: none;
   transition: opacity 220ms ease;
 }
 #loadingHud[hidden] { display: none !important; }
-#loadingHud.is-complete { opacity: 0; pointer-events: none; }
+#loadingHud.is-complete { opacity: 0; }
 
 .loading-card {
   width: min(380px, 100%);

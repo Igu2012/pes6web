@@ -16,6 +16,7 @@ UPSTREAM = "https://pes6.optijuegos.net/"
 ROOT = Path(__file__).resolve().parent
 SITE = ROOT / "site"
 USER_AGENT = "PES6WebLocalBootstrap/1.0 (local user-initiated setup)"
+ASSET_VERSION = "20261016-loading-transition-v2"
 
 # Upstream client files are downloaded directly from their publisher at setup
 # time, rather than mirrored in this repository.
@@ -44,6 +45,10 @@ GAME_ONLY_CSS = GAME_ONLY_CSS.replace(
     "#netStatus:not(.error),#pakStatus{display:none!important}",
     "#netStatus,#pakStatus{display:none!important}",
 ).replace("#netStatus.error{display:block!important;", "#netStatus.error{display:none!important;")
+GAME_ONLY_CSS = GAME_ONLY_CSS.replace(
+    "#stage #overlay{z-index:8;opacity:0;pointer-events:none;background:#000!important}",
+    "#stage #overlay:not(.boot-error){z-index:8;display:none!important;opacity:0;pointer-events:none;background:#000!important}",
+)
 
 
 def request(url: str):
@@ -86,28 +91,52 @@ def customize_site() -> None:
     )
     if old_bootstrap in text:
         text = text.replace(old_bootstrap, new_bootstrap, 1)
-    elif new_bootstrap not in text:
+    loading_ui_pattern = re.compile(r'<link rel="stylesheet" href="css/loading-ui\.css(?:\?[^"]*)?">')
+    loading_ui_links = list(loading_ui_pattern.finditer(text))
+    if not loading_ui_links:
         text = replace_once(text, '<link rel="stylesheet" href="css/rooms.css">',
                             new_bootstrap, "fullscreen page bootstrap")
-    game_only_link = '<link rel="stylesheet" href="css/game-only.css">'
-    if game_only_link in text:
-        first_link = text.find(game_only_link) + len(game_only_link)
-        text = text[:first_link] + text[first_link:].replace(game_only_link, "")
+    else:
+        for match in reversed(loading_ui_links[1:]):
+            text = text[:match.start()] + text[match.end():]
+    game_only_pattern = re.compile(r'<link rel="stylesheet" href="css/game-only\.css(?:\?[^"]*)?">')
+    game_only_links = list(game_only_pattern.finditer(text))
+    if not game_only_links:
+        text = replace_once(text, '<link rel="stylesheet" href="css/rooms.css">',
+                            '<link rel="stylesheet" href="css/rooms.css">\n  <link rel="stylesheet" href="css/game-only.css">',
+                            "fullscreen game-only stylesheet")
+    else:
+        for match in reversed(game_only_links[1:]):
+            text = text[:match.start()] + text[match.end():]
     text = replace_once(text, '<div class="compat-notice" id="compatNotice" hidden></div>',
                         '<div class="compat-notice" id="compatNotice" hidden></div>\n          <p id="fatalError" role="alert" hidden></p>',
                         "error notice hook")
-    text = replace_once(
-        text,
-        '<script src="js/runtime/loader.js"></script>',
-        '<script src="js/loading-progress.js"></script>\n  <script src="js/runtime/loader.js"></script>',
-        "startup progress screen",
-    )
+    progress_script_pattern = re.compile(r'<script src="js/loading-progress\.js(?:\?[^"]*)?"></script>')
+    progress_scripts = list(progress_script_pattern.finditer(text))
+    if not progress_scripts:
+        text = replace_once(
+            text,
+            '<script src="js/runtime/loader.js"></script>',
+            '<script src="js/loading-progress.js"></script>\n  <script src="js/runtime/loader.js"></script>',
+            "startup progress screen",
+        )
+    else:
+        for match in reversed(progress_scripts[1:]):
+            text = text[:match.start()] + text[match.end():]
+    for asset in ("css/game-only.css", "css/loading-ui.css", "js/loading-progress.js"):
+        pattern = r'(["\'])' + re.escape(asset) + r'(?:\?[^"\']*)?\1'
+        text = re.sub(
+            pattern,
+            lambda match, asset=asset: match.group(1) + asset + "?v=" + ASSET_VERSION + match.group(1),
+            text,
+        )
     text = replace_once(
         text,
         '<script src="js/data.js"></script>',
         '<script src="js/pak-chunks.js"></script>\n  <script src="js/data.js"></script>',
         "GitHub Pages chunk reader",
     )
+    text = re.sub(r"[ \t]+$", "", text, flags=re.MULTILINE)
     index.write_text(text, encoding="utf-8")
 
     config = SITE / "js/config.js"
