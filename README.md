@@ -1,26 +1,26 @@
-# PES 6 — Tela cheia local
+# PES 6 — Local Fullscreen
 
-Cópia local do cliente web **PES 6 Web Online Port** publicado em [pes6.optijuegos.net](https://pes6.optijuegos.net/), incluindo motor WebAssembly e pacote de dados. Este repositório mantém o pacote em quatro partes (`payload/pes6.pak.parts/`) para respeitar o limite de tamanho por arquivo do GitHub; o launcher remonta o arquivo automaticamente antes de abrir o jogo.
+A local copy of the **PES 6 Web Online Port** web client published at [pes6.optijuegos.net](https://pes6.optijuegos.net/), including its WebAssembly engine and data package. This repository stores the data package in four parts (`payload/pes6.pak.parts/`) to stay within GitHub's per-file size limit; the launcher reassembles it automatically before starting the game.
 
-## Como abrir
+## How to launch
 
-- **Windows:** execute `START-GAME.cmd`.
-- **Linux/macOS:** execute `./start-game.sh`.
+- **Windows:** run `START-GAME.cmd`.
+- **Linux/macOS:** run `./start-game.sh`.
 
-O launcher precisa de **Python 3** e chama `assemble_pak.py` antes de iniciar o servidor. A montagem verifica o tamanho e o SHA-256; se algum chunk estiver ausente ou alterado, o jogo não inicia. O arquivo reconstruído fica em `site/assets/pes6.pak` (352.054.197 bytes). O servidor HTTP local usa `127.0.0.1:8765` e apenas a biblioteca padrão do Python, sem `pip`. Não abra `site/index.html` diretamente como `file://`: o navegador bloqueia o WebAssembly e as requisições por intervalos do pacote.
+The launcher requires **Python 3** and runs `assemble_pak.py` before starting the server. Assembly verifies the package size and SHA-256 hash; if a chunk is missing or modified, the game will not start. The rebuilt file is written to `site/assets/pes6.pak` (352,054,197 bytes). The local HTTP server listens on `127.0.0.1:8765` and uses only the Python standard library, with no `pip` dependencies. Do not open `site/index.html` directly with `file://`: browsers block WebAssembly and the package's range requests that way.
 
-Pressione **F11** se quiser ocultar também as barras do navegador. Para parar o servidor no Windows, feche a janela minimizada do servidor ou execute `STOP-GAME.cmd`.
+Press **F11** to hide the browser bars as well. On Windows, stop the server by closing its minimized window or running `STOP-GAME.cmd`.
 
-## O que esperar
+## What to expect
 
-A página mostra só a imagem do jogo, ocupa toda a área visível do navegador e inicia a emulação sozinha. A tela de loading do site e as opções de início foram ocultadas; o motor ainda faz a preparação necessária dos arquivos locais antes de exibir a primeira imagem. A configuração inicial seleciona inglês e pula a intro.
+The page displays only the game image, fills the browser's visible area, and starts emulation automatically. The website loading screen and start options have been hidden; the engine still performs the required local file preparation before showing the first frame. The initial configuration selects English and skips the intro.
 
-O primeiro menu visível pode ser a tela **Game Level**, que pertence ao próprio PES 6. **Regular** já fica selecionado. Confirme essa escolha para continuar; o launcher não escolhe dificuldade, times nem inicia uma partida por conta própria.
+The first visible menu may be **Game Level**, which is part of PES 6 itself. **Regular** is selected by default. Confirm that choice to continue; the launcher does not choose a difficulty, teams, or start a match on its own.
 
-O pacote de dados é lido localmente conforme necessário. O modo individual não precisa buscar o pacote pela Internet; o modo online continua dependendo de conexão e do relay do projeto original.
+Single-player mode does not need to fetch the package from the Internet. Online mode still depends on a connection and the original project's relay.
 
-## Compatibilidade e origem
+## Compatibility and attribution
 
-Use um navegador atualizado com **WebGL 2** e aceleração gráfica habilitada. Esta é a versão PSP de PES 6 portada para WebAssembly, não a edição nativa de PC.
+Use an up-to-date browser with **WebGL 2** and hardware acceleration enabled. This is the PSP version of PES 6 ported to WebAssembly, not the native PC edition.
 
-Cliente web e motor: **OptiProjects / PES 6 Web Online Port** — https://pes6.optijuegos.net/. Os dados vieram do pacote configurado pelo próprio site. O projeto original declara não ser afiliado à Konami; Pro Evolution Soccer e seu conteúdo pertencem aos respectivos titulares. Esta cópia destina-se ao uso local; **não redistribua publicamente**.
+Web client and engine: **OptiProjects / PES 6 Web Online Port** — https://pes6.optijuegos.net/. The data comes from the package configured by that site. The original project states that it is not affiliated with Konami; Pro Evolution Soccer and its content belong to their respective rights holders. This copy is intended for local use; **do not redistribute it publicly**.
