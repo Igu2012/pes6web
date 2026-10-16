@@ -5,7 +5,7 @@
   var MB = 1024 * 1024;
   var host = window.location.hostname.toLowerCase();
   var loopback = host === 'localhost' || host === '127.0.0.1' || host === '::1';
-  var pakTotal = 0;
+  var pakTotal = Math.max(0, Number(window.PES6_PAK_TOTAL_BYTES) || 0);
   var pakMetadataBytes = 0;
   var failed = false;
   var gameStarted = false;
@@ -54,7 +54,7 @@
     hud.classList.remove('is-complete');
     title.textContent = /^downloading\b/i.test(String(stage || '')) ? 'Downloading' : 'Loading';
     var current = Math.max(0, Number(loaded) || 0);
-    var max = Math.max(0, Number(total) || 0);
+    var max = Math.max(0, Number(total) || pakTotal);
     if (max > 0) {
       progress.max = max;
       progress.value = Math.min(current, max);
@@ -90,11 +90,10 @@
     var text = String(message || 'Unknown error');
     var guidance;
     if (/HTTP\s*404/i.test(text)) {
-      guidance = 'PES 6 could not load its local game data (HTTP 404).\n'
-        + 'Expected file: site/assets/pes6.pak.\n'
-        + 'For the local ZIP, restore it with: python3 bootstrap.py --pak /path/to/pes6.pak.\n'
-        + 'From the GitHub repository, run: python3 assemble_pak.py (Windows: py -3 assemble_pak.py).\n'
-        + 'For setup help, see https://github.com/Igu2012/pes6web';
+      guidance = 'PES 6 game data could not be read (HTTP 404).\n'
+        + 'The public site streams data from repository chunks and does not need a preassembled PAK. Reload the page and verify that the chunk files are available.\n'
+        + 'For the local ZIP, restore its PAK with: python3 bootstrap.py --pak /path/to/pes6.pak.\n'
+        + 'Source and chunk files: https://github.com/Igu2012/pes6web';
     } else if (/webgpu|webgl|gpu|renderer|graphics|context|device|adapter|navegador no compatible/i.test(text)) {
       guidance = 'PES 6 could not initialize browser graphics (WebGPU/WebGL).\n'
         + 'Enable hardware acceleration, update your graphics drivers, and try a current Chrome, Edge, or Firefox browser.\n'
